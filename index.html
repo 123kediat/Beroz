@@ -1,0 +1,230 @@
+import React, { useState, useEffect } from 'react';
+import {
+  AppBar, Toolbar, Typography, Button, IconButton, Drawer, List, ListItem, ListItemText,
+  Container, Paper, Box, Grid, LinearProgress, Card, CardContent, TextField, RadioGroup,
+  FormControlLabel, Radio, Checkbox, FormControl, FormLabel, Select, MenuItem, InputLabel,
+  Dialog, DialogTitle, DialogContent, DialogActions
+} from '@mui/material';
+import {
+  Menu as MenuIcon,
+  Dashboard as DashboardIcon,
+  Assessment as AssessmentIcon,
+  Search as SearchIcon,
+  School as SchoolIcon,
+  Work as WorkIcon
+} from '@mui/icons-material';
+import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+
+// Define a new, more vibrant and modern theme for Material-UI
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: '#FF5722', // Deep Orange - Energetic and inviting
+    },
+    secondary: {
+      main: '#4CAF50', // Green - Fresh and growth-oriented
+    },
+    error: {
+      main: '#F44336', // Red - Standard error color
+    },
+    background: {
+      default: '#E8F5E9', // Very light green/grey for a soft background
+      paper: '#FFFFFF', // Pure white for cards and containers
+    },
+    text: {
+      primary: '#212121', // Dark grey for strong readability
+      secondary: '#616161', // Medium grey for secondary text
+    },
+  },
+  typography: {
+    fontFamily: 'Inter, sans-serif',
+    h4: {
+      fontWeight: 800, // Extra bold for impact
+      color: '#212121',
+      letterSpacing: '-0.02em', // Slightly tighter for modern feel
+    },
+    h5: {
+      fontWeight: 700,
+      color: '#212121',
+    },
+    h6: {
+      fontWeight: 600,
+      color: '#FF5722', // Primary color for section titles
+    },
+    body1: {
+      fontSize: '1.05rem', // Slightly larger for better readability
+      lineHeight: 1.7, // Increased line height
+    },
+    button: {
+      textTransform: 'uppercase', // Uppercase for a strong call to action
+      fontWeight: 700,
+      letterSpacing: '0.05em', // Slightly spaced out
+    },
+  },
+  components: {
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          borderRadius: 12, // More pronounced rounded corners
+          padding: '14px 28px', // Larger buttons
+          transition: 'all 0.3s cubic-bezier(.25,.8,.25,1)', // Smooth transition
+        },
+        containedPrimary: {
+          background: 'linear-gradient(45deg, #FF5722 30%, #FF8A65 90%)', // Orange gradient
+          boxShadow: '0 8px 25px rgba(255, 87, 34, 0.4)', // Deeper shadow
+          '&:hover': {
+            boxShadow: '0 12px 35px rgba(255, 87, 34, 0.5)',
+            transform: 'translateY(-3px)', // More noticeable lift
+            background: 'linear-gradient(45deg, #FF8A65 30%, #FF5722 90%)', // Reverse gradient on hover
+          },
+        },
+        outlinedPrimary: {
+          borderColor: '#FF5722',
+          color: '#FF5722',
+          borderWidth: '2px', // Thicker border
+          '&:hover': {
+            backgroundColor: 'rgba(255, 87, 34, 0.08)', // Light orange hover
+            transform: 'translateY(-2px)',
+            borderWidth: '2px',
+          },
+        },
+      },
+    },
+    MuiPaper: {
+      styleOverrides: {
+        root: {
+          borderRadius: 20, // Even more rounded
+          boxShadow: '0 10px 40px rgba(0, 0, 0, 0.1)', // Softer, larger shadow
+          padding: 40, // Increased padding for spacious feel
+        },
+      },
+    },
+    MuiCard: {
+      styleOverrides: {
+        root: {
+          borderRadius: 16,
+          boxShadow: '0 6px 20px rgba(0, 0, 0, 0.08)',
+          transition: 'transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out',
+          '&:hover': {
+            transform: 'translateY(-8px)', // More pronounced lift
+            boxShadow: '0 12px 30px rgba(0, 0, 0, 0.15)',
+          },
+        },
+      },
+    },
+    MuiLinearProgress: {
+      styleOverrides: {
+        root: {
+          height: 14, // Thicker progress bar
+          borderRadius: 7,
+          backgroundColor: '#E0E0E0',
+        },
+        bar: {
+          borderRadius: 7,
+          backgroundColor: '#4CAF50', // Green for progress
+        },
+      },
+    },
+    MuiAppBar: {
+      styleOverrides: {
+        root: {
+          boxShadow: '0 6px 15px rgba(0, 0, 0, 0.1)',
+          background: 'linear-gradient(90deg, #FF5722 0%, #FF8A65 100%)', // Orange gradient AppBar
+        },
+      },
+    },
+    MuiTextField: {
+      styleOverrides: {
+        root: {
+          '& .MuiOutlinedInput-root': {
+            borderRadius: 10, // Rounded input fields
+          },
+        },
+      },
+    },
+    MuiSelect: {
+      styleOverrides: {
+        root: {
+          borderRadius: 10,
+        },
+      },
+    },
+  },
+});
+
+// Mock data for demonstration
+const mockProgressData = [
+  { name: 'Jan', progress: 30 },
+  { name: 'Feb', progress: 45 },
+  { name: 'Mar', progress: 60 },
+  { name: 'Apr', progress: 75 },
+  { name: 'May', progress: 90 },
+];
+
+// --- EXTENDED MOCK COURSE RECOMMENDATIONS (100+ entries) ---
+const mockCourseRecommendations = [
+  { id: 1, title: 'Introduction to Data Science', platform: 'Coursera', link: 'https://www.coursera.org/learn/introduction-data-science', description: 'Learn the fundamentals of data science.', category: 'Technology' },
+  { id: 2, title: 'Project Management Basics', platform: 'edX', link: 'https://www.edx.org/learn/project-management-basics', description: 'Master essential project management skills.', category: 'Business' },
+  { id: 3, title: 'Python for Everybody', platform: 'Coursera', link: 'https://www.coursera.org/learn/python', description: 'A beginner-friendly introduction to Python programming.', category: 'Technology' },
+  { id: 4, title: 'Digital Marketing Fundamentals', platform: 'LinkedIn Learning', link: 'https://www.linkedin.com/learning/digital-marketing-foundations', description: 'Explore the core concepts of digital marketing.', category: 'Marketing' },
+  { id: 5, title: 'Machine Learning by Andrew Ng', platform: 'Coursera', link: 'https://www.coursera.org/learn/machine-learning', description: 'The classic machine learning course by Andrew Ng.', category: 'Technology' },
+  { id: 6, title: 'Web Development Bootcamp', platform: 'Udemy', link: 'https://www.udemy.com/course/the-complete-web-development-bootcamp/', description: 'Become a full-stack web developer.', category: 'Technology' },
+  { id: 7, title: 'Financial Markets', platform: 'Coursera', link: 'https://www.coursera.org/learn/financial-markets-global', description: 'Understand the structure and function of financial markets.', category: 'Finance' },
+  { id: 8, title: 'Introduction to Cybersecurity', platform: 'edX', link: 'https://www.edx.org/learn/cybersecurity/introduction-to-cybersecurity', description: 'Learn about cybersecurity threats and defense mechanisms.', category: 'Technology' },
+  { id: 9, title: 'Graphic Design Fundamentals', platform: 'Coursera', link: 'https://www.coursera.org/learn/graphic-design-fundamentals', description: 'Master the basics of graphic design principles.', category: 'Design' },
+  { id: 10, title: 'SQL for Data Science', platform: 'Coursera', link: 'https://www.coursera.org/learn/sql-for-data-science', description: 'Learn SQL for data analysis and manipulation.', category: 'Technology' },
+  { id: 11, title: 'Cloud Computing Basics', platform: 'edX', link: 'https://www.edx.org/learn/cloud-computing/introduction-to-cloud-computing', description: 'An introduction to cloud computing concepts and services.', category: 'Technology' },
+  { id: 12, title: 'JavaScript Algorithms and Data Structures', platform: 'freeCodeCamp', link: 'https://www.freecodecamp.org/learn/javascript-algorithms-and-data-structures/', description: 'Learn fundamental JavaScript concepts and data structures.', category: 'Technology' },
+  { id: 13, title: 'Business Analytics Specialization', platform: 'Coursera', link: 'https://www.coursera.org/specializations/business-analytics', description: 'Develop skills in data modeling, analytics, and decision making.', category: 'Business' },
+  { id: 14, title: 'Supply Chain Management', platform: 'edX', link: 'https://www.edx.org/learn/supply-chain-management', description: 'Understand the complexities of global supply chains.', category: 'Business' },
+  { id: 15, title: 'Artificial Intelligence for Everyone', platform: 'Coursera', link: 'https://www.coursera.org/learn/ai-for-everyone', description: 'Demystify AI and understand its impact on business and society.', category: 'Technology' },
+  { id: 16, title: 'React - The Complete Guide', platform: 'Udemy', link: 'https://www.udemy.com/course/react-the-complete-guide-incl-redux/', description: 'Master React.js and build powerful front-end applications.', category: 'Technology' },
+  { id: 17, title: 'Introduction to Psychology', platform: 'Coursera', link: 'https://www.coursera.org/learn/introduction-psychology', description: 'Explore the scientific study of the mind and behavior.', category: 'Science' },
+  { id: 18, title: 'Blockchain Basics', platform: 'Coursera', link: 'https://www.coursera.org/learn/blockchain-basics', description: 'Understand the core concepts of blockchain technology.', category: 'Technology' },
+  { id: 19, title: 'Agile Project Management', platform: 'edX', link: 'https://www.edx.org/learn/agile-project-management', description: 'Learn agile methodologies for project delivery.', category: 'Business' },
+  { id: 20, title: 'Data Visualization with Python', platform: 'Coursera', link: 'https://www.coursera.org/learn/data-visualization-python', description: 'Create compelling data visualizations using Python.', category: 'Technology' },
+  { id: 21, title: 'Fundamentals of Accounting', platform: 'Swayam', link: 'https://swayam.gov.in/nd1_sem1/cec19_mg01/preview', description: 'Basic principles of accounting for non-finance professionals.', category: 'Finance' },
+  { id: 22, title: 'Effective Public Speaking', platform: 'Coursera', link: 'https://www.coursera.org/learn/public-speaking', description: 'Improve your public speaking and presentation skills.', category: 'Soft Skills' },
+  { id: 23, title: 'Introduction to R for Data Science', platform: 'edX', link: 'https://www.edx.org/learn/r-programming/introduction-to-r-for-data-science', description: 'Learn the basics of R programming for data analysis.', category: 'Technology' },
+  { id: 24, title: 'Game Development with Unity', platform: 'Coursera', link: 'https://www.coursera.org/specializations/game-development-unity', description: 'Build 2D and 3D games using Unity.', category: 'Technology' },
+  { id: 25, title: 'Cybersecurity for Business', platform: 'LinkedIn Learning', link: 'https://www.linkedin.com/learning/cybersecurity-for-business-leaders', description: 'Understand cybersecurity risks and strategies for businesses.', category: 'Business' },
+  { id: 26, title: 'Introduction to HTML5', platform: 'edX', link: 'https://www.edx.org/learn/html5/introduction-to-html5', description: 'Learn the foundational language of the web.', category: 'Technology' },
+  { id: 27, title: 'CSS3 Fundamentals', platform: 'Udemy', link: 'https://www.udemy.com/course/css-the-complete-guide/', description: 'Style web pages with modern CSS techniques.', category: 'Technology' },
+  { id: 28, title: 'Node.js, Express, MongoDB & More', platform: 'Udemy', link: 'https://www.udemy.com/course/nodejs-express-mongodb-bootcamp/', description: 'Build robust backend applications with Node.js.', category: 'Technology' },
+  { id: 29, title: 'Data Structures & Algorithms in Java', platform: 'Coursera', link: 'https://www.coursera.org/specializations/data-structures-algorithms', description: 'Master essential data structures and algorithms.', category: 'Technology' },
+  { id: 30, title: 'Google IT Support Professional Certificate', platform: 'Coursera', link: 'https://www.coursera.org/professional-certificates/google-it-support', description: 'Prepare for an entry-level job in IT support.', category: 'Technology' },
+  { id: 31, title: 'Introduction to Cloud Identity', platform: 'Coursera', link: 'https://www.coursera.org/learn/introduction-to-cloud-identity', description: 'Understand identity and access management in the cloud.', category: 'Technology' },
+  { id: 32, title: 'Introduction to TensorFlow for AI, ML, and DL', platform: 'Coursera', link: 'https://www.coursera.org/learn/introduction-tensorflow', description: 'Learn to build and train neural networks with TensorFlow.', category: 'Technology' },
+  { id: 33, title: 'Marketing Analytics', platform: 'edX', link: 'https://www.edX.org/learn/marketing-analytics', description: 'Use data to drive marketing decisions.', category: 'Marketing' },
+  { id: 34, title: 'Customer Relationship Management', platform: 'Swayam', link: 'https://swayam.gov.in/nd1_sem1/cec19_mg03/preview', description: 'Strategies for managing customer relationships effectively.', category: 'Business' },
+  { id: 35, title: 'Photography Basics and Beyond', platform: 'Coursera', link: 'https://www.coursera.org/learn/photography-basics', description: 'Learn the fundamentals of digital photography.', category: 'Arts & Culture' },
+  { id: 36, title: 'Introduction to Linux', platform: 'edX', link: 'https://www.edX.org/learn/linux/introduction-to-linux', description: 'Get started with the Linux operating system.', category: 'Technology' },
+  { id: 37, title: 'Java Programming and Software Engineering Fundamentals', platform: 'Coursera', link: 'https://www.coursera.org/specializations/java-programming', description: 'Learn Java and object-oriented programming.', category: 'Technology' },
+  { id: 38, title: 'UX Design Fundamentals', platform: 'Coursera', link: 'https://www.coursera.org/learn/user-experience-design', description: 'Understand the principles of user experience design.', category: 'Design' },
+  { id: 39, title: 'Introduction to Microsoft Excel', platform: 'Coursera', link: 'https://www.coursera.org/learn/excel-basics', description: 'Master essential Excel functions for data analysis.', category: 'Business' },
+  { id: 40, title: 'Data Science with Python', platform: 'IBM (Coursera)', link: 'https://www.coursera.org/professional-certificates/ibm-data-science', description: 'A comprehensive program for aspiring data scientists.', category: 'Technology' },
+  { id: 41, title: 'Introduction to Game Design', platform: 'Coursera', link: 'https://www.coursera.org/learn/game-design', description: 'Learn the core principles of game design.', category: 'Design' },
+  { id: 42, title: 'Foundations of Project Management', platform: 'Coursera', link: 'https://www.coursera.org/professional-certificates/google-project-management', description: 'Google Project Management Professional Certificate.', category: 'Business' },
+  { id: 43, title: 'Elements of AI', platform: 'Elements of AI', link: 'https://www.elementsofai.com/', description: 'A free online course about the basics of AI.', category: 'Technology' },
+  { id: 44, title: 'Introduction to Computer Science and Programming Using Python', platform: 'edX', link: 'https://www.edx.org/course/introduction-to-computer-science-and-programming-using-python', description: 'MIT\'s foundational computer science course.', category: 'Technology' },
+  { id: 45, title: 'The Science of Well-Being', platform: 'Coursera', link: 'https://www.coursera.org/learn/the-science-of-well-being', description: 'Yale\'s most popular course on happiness.', category: 'Science' },
+  { id: 46, title: 'Python Data Structures', platform: 'Coursera', link: 'https://www.coursera.org/learn/python-data-structures', description: 'Learn about Python data structures and algorithms.', category: 'Technology' },
+  { id: 47, title: 'Introduction to HTML and CSS', platform: 'Coursera', link: 'https://www.coursera.org/learn/html-css-javascript-for-web-developers', description: 'Build basic web pages with HTML and CSS.', category: 'Technology' },
+  { id: 48, title: 'Introduction to iOS App Development with Swift', platform: 'Coursera', link: 'https://www.coursera.org/specializations/ios-app-development', description: 'Learn to build iOS apps with Swift and Xcode.', category: 'Technology' },
+  { id: 49, title: 'Fundamentals of Digital Marketing', platform: 'Google Digital Garage', link: 'https://learndigital.withgoogle.com/digitalgarage/course/digital-marketing', description: 'Free course by Google on digital marketing essentials.', category: 'Marketing' },
+  { id: 50, title: 'Excel Skills for Business', platform: 'Coursera', link: 'https://www.coursera.org/specializations/excel-skills-for-business', description: 'Master advanced Excel skills for business analysis.', category: 'Business' },
+  { id: 51, title: 'Data Analysis and Visualization Foundations', platform: 'LinkedIn Learning', link: 'https://www.linkedin.com/learning/paths/data-analysis-and-visualization-foundations', description: 'Learn to analyze and visualize data effectively.', category: 'Technology' },
+  { id: 52, title: 'Introduction to Data Analytics', platform: 'Google (Coursera)', link: 'https://www.coursera.org/professional-certificates/google-data-analytics', description: 'Google Data Analytics Professional Certificate.', category: 'Technology' },
+  { id: 53, title: 'Foundations of User Experience (UX) Design', platform: 'Google (Coursera)', link: 'https://www.coursera.org/professional-certificates/google-ux-design', description: 'Google UX Design Professional Certificate.', category: 'Design' },
+  { id: 54, title: 'Python for Data Analysis', platform: 'DataCamp', link: 'https://www.datacamp.com/courses/python-for-data-analysis', description: 'Learn to analyze data using Python libraries like Pandas.', category: 'Technology' },
+  { id: 55, title: 'Introduction to Cloud Computing', platform: 'IBM (Coursera)', link: 'https://www.coursera.org/learn/introduction-to-cloud', description: 'Explore the basics of cloud computing from IBM.', category: 'Technology' },
+  { id: 56, title: 'Front-End Web Development with React', platform: 'Coursera', link: 'https://www.coursera.org/learn/front-end-react', description: 'Build modern web applications using React.', category: 'Technology' },
+  { id: 57, title: 'Introduction to Cybercrime', platform: 'FutureLearn', link: 'https://www.futurelearn.com/courses/cybercrime', description: 'Understand the nature of cybercrime and its impact.', category: 'Cybersecurity' },
+  { id: 58, title: 'Mindfulness for Well-being', platform: 'Coursera', link: 'https://www.coursera.org/learn/mindfulness-wellbeing', description: 'Practice mindfulness for stress reduction and well-being.', category: 'Well-being' },
+  { id: 59, title: 'Introduction to Business Management', platform: 'edX', link: 'https://www.edX.org/learn/business-management', description: 'Key concepts and practices in modern business management.', category: 'Business' },
+  { id: 60, title: 'Data Engineering with Google Cloud', platform: 'Coursera', link: 'https://www.coursera.org/specializations/gcp-data-engineering', description: 'Build and manage data pipelines on Google Cloud.', category: 'Technology' },
+  { id: 61, title: 'Introduction to SQL', platform: 'DataCamp', link: 'https://www.datacamp.com/courses/introduction-to-sql', description: 'A beginner-friendly introduction to SQL.', category: 'Technology' },
+  { id: 62, title: 'The Complete JavaScript Course 2024', platform: 'Udemy', link: 'https://www.udemy.com/course/the-complete-javascript-course/', description: 'Master JavaScript from scratch to advanced concepts.', category: 'Technology' },
+  { id: 63, title: 'Introduction to Game Theory', platform: 'Coursera', link: 'https://www.coursera.org/learn/game-theory-1', description: 'Explore strategic thinking and decision-making.', category: 'Science' },
+  { id: 64, title: 'Digital Photography: From Beginner to Pro', platform: 'Udemy', link: 'https://www.udemy.com/course/digital-photography-for-beginners-to-advanced-training/', description: 'Comprehensive guid
