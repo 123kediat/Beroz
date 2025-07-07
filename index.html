@@ -1,230 +1,294 @@
-import React, { useState, useEffect } from 'react';
-import {
-  AppBar, Toolbar, Typography, Button, IconButton, Drawer, List, ListItem, ListItemText,
-  Container, Paper, Box, Grid, LinearProgress, Card, CardContent, TextField, RadioGroup,
-  FormControlLabel, Radio, Checkbox, FormControl, FormLabel, Select, MenuItem, InputLabel,
-  Dialog, DialogTitle, DialogContent, DialogActions
-} from '@mui/material';
-import {
-  Menu as MenuIcon,
-  Dashboard as DashboardIcon,
-  Assessment as AssessmentIcon,
-  Search as SearchIcon,
-  School as SchoolIcon,
-  Work as WorkIcon
-} from '@mui/icons-material';
-import { createTheme, ThemeProvider } from '@mui/material/styles';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>berozgaars - Premium Subscription</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Simple transition for view switching */
+        .view {
+            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+        }
+        .view.hidden {
+            opacity: 0;
+            transform: scale(0.95);
+            display: none;
+        }
+        /* Custom animation for the success checkmark */
+        @keyframes draw {
+            to {
+                stroke-dashoffset: 0;
+            }
+        }
+        .success-checkmark__circle {
+            stroke-dasharray: 166;
+            stroke-dashoffset: 166;
+            animation: draw 0.6s forwards;
+        }
+        .success-checkmark__check {
+            stroke-dasharray: 48;
+            stroke-dashoffset: 48;
+            animation: draw 0.4s forwards 0.4s;
+        }
+        .glowing-border {
+            box-shadow: 0 0 0 2px #fff, 0 0 0 4px #10B981;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
 
-// Define a new, more vibrant and modern theme for Material-UI
-const theme = createTheme({
-  palette: {
-    primary: {
-      main: '#FF5722', // Deep Orange - Energetic and inviting
-    },
-    secondary: {
-      main: '#4CAF50', // Green - Fresh and growth-oriented
-    },
-    error: {
-      main: '#F44336', // Red - Standard error color
-    },
-    background: {
-      default: '#E8F5E9', // Very light green/grey for a soft background
-      paper: '#FFFFFF', // Pure white for cards and containers
-    },
-    text: {
-      primary: '#212121', // Dark grey for strong readability
-      secondary: '#616161', // Medium grey for secondary text
-    },
-  },
-  typography: {
-    fontFamily: 'Inter, sans-serif',
-    h4: {
-      fontWeight: 800, // Extra bold for impact
-      color: '#212121',
-      letterSpacing: '-0.02em', // Slightly tighter for modern feel
-    },
-    h5: {
-      fontWeight: 700,
-      color: '#212121',
-    },
-    h6: {
-      fontWeight: 600,
-      color: '#FF5722', // Primary color for section titles
-    },
-    body1: {
-      fontSize: '1.05rem', // Slightly larger for better readability
-      lineHeight: 1.7, // Increased line height
-    },
-    button: {
-      textTransform: 'uppercase', // Uppercase for a strong call to action
-      fontWeight: 700,
-      letterSpacing: '0.05em', // Slightly spaced out
-    },
-  },
-  components: {
-    MuiButton: {
-      styleOverrides: {
-        root: {
-          borderRadius: 12, // More pronounced rounded corners
-          padding: '14px 28px', // Larger buttons
-          transition: 'all 0.3s cubic-bezier(.25,.8,.25,1)', // Smooth transition
-        },
-        containedPrimary: {
-          background: 'linear-gradient(45deg, #FF5722 30%, #FF8A65 90%)', // Orange gradient
-          boxShadow: '0 8px 25px rgba(255, 87, 34, 0.4)', // Deeper shadow
-          '&:hover': {
-            boxShadow: '0 12px 35px rgba(255, 87, 34, 0.5)',
-            transform: 'translateY(-3px)', // More noticeable lift
-            background: 'linear-gradient(45deg, #FF8A65 30%, #FF5722 90%)', // Reverse gradient on hover
-          },
-        },
-        outlinedPrimary: {
-          borderColor: '#FF5722',
-          color: '#FF5722',
-          borderWidth: '2px', // Thicker border
-          '&:hover': {
-            backgroundColor: 'rgba(255, 87, 34, 0.08)', // Light orange hover
-            transform: 'translateY(-2px)',
-            borderWidth: '2px',
-          },
-        },
-      },
-    },
-    MuiPaper: {
-      styleOverrides: {
-        root: {
-          borderRadius: 20, // Even more rounded
-          boxShadow: '0 10px 40px rgba(0, 0, 0, 0.1)', // Softer, larger shadow
-          padding: 40, // Increased padding for spacious feel
-        },
-      },
-    },
-    MuiCard: {
-      styleOverrides: {
-        root: {
-          borderRadius: 16,
-          boxShadow: '0 6px 20px rgba(0, 0, 0, 0.08)',
-          transition: 'transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out',
-          '&:hover': {
-            transform: 'translateY(-8px)', // More pronounced lift
-            boxShadow: '0 12px 30px rgba(0, 0, 0, 0.15)',
-          },
-        },
-      },
-    },
-    MuiLinearProgress: {
-      styleOverrides: {
-        root: {
-          height: 14, // Thicker progress bar
-          borderRadius: 7,
-          backgroundColor: '#E0E0E0',
-        },
-        bar: {
-          borderRadius: 7,
-          backgroundColor: '#4CAF50', // Green for progress
-        },
-      },
-    },
-    MuiAppBar: {
-      styleOverrides: {
-        root: {
-          boxShadow: '0 6px 15px rgba(0, 0, 0, 0.1)',
-          background: 'linear-gradient(90deg, #FF5722 0%, #FF8A65 100%)', // Orange gradient AppBar
-        },
-      },
-    },
-    MuiTextField: {
-      styleOverrides: {
-        root: {
-          '& .MuiOutlinedInput-root': {
-            borderRadius: 10, // Rounded input fields
-          },
-        },
-      },
-    },
-    MuiSelect: {
-      styleOverrides: {
-        root: {
-          borderRadius: 10,
-        },
-      },
-    },
-  },
-});
+    <div id="app-container" class="min-h-screen flex flex-col items-center justify-center p-4">
 
-// Mock data for demonstration
-const mockProgressData = [
-  { name: 'Jan', progress: 30 },
-  { name: 'Feb', progress: 45 },
-  { name: 'Mar', progress: 60 },
-  { name: 'Apr', progress: 75 },
-  { name: 'May', progress: 90 },
-];
+        <!-- View 1: Subscription Plan Selection -->
+        <div id="plan-selection-view" class="view w-full max-w-4xl mx-auto">
+            <header class="text-center mb-10">
+                <h1 class="text-4xl md:text-5xl font-extrabold text-green-600">berozgaars</h1>
+                <p class="text-lg text-gray-500 mt-2">Unlock Your Career Potential</p>
+            </header>
 
-// --- EXTENDED MOCK COURSE RECOMMENDATIONS (100+ entries) ---
-const mockCourseRecommendations = [
-  { id: 1, title: 'Introduction to Data Science', platform: 'Coursera', link: 'https://www.coursera.org/learn/introduction-data-science', description: 'Learn the fundamentals of data science.', category: 'Technology' },
-  { id: 2, title: 'Project Management Basics', platform: 'edX', link: 'https://www.edx.org/learn/project-management-basics', description: 'Master essential project management skills.', category: 'Business' },
-  { id: 3, title: 'Python for Everybody', platform: 'Coursera', link: 'https://www.coursera.org/learn/python', description: 'A beginner-friendly introduction to Python programming.', category: 'Technology' },
-  { id: 4, title: 'Digital Marketing Fundamentals', platform: 'LinkedIn Learning', link: 'https://www.linkedin.com/learning/digital-marketing-foundations', description: 'Explore the core concepts of digital marketing.', category: 'Marketing' },
-  { id: 5, title: 'Machine Learning by Andrew Ng', platform: 'Coursera', link: 'https://www.coursera.org/learn/machine-learning', description: 'The classic machine learning course by Andrew Ng.', category: 'Technology' },
-  { id: 6, title: 'Web Development Bootcamp', platform: 'Udemy', link: 'https://www.udemy.com/course/the-complete-web-development-bootcamp/', description: 'Become a full-stack web developer.', category: 'Technology' },
-  { id: 7, title: 'Financial Markets', platform: 'Coursera', link: 'https://www.coursera.org/learn/financial-markets-global', description: 'Understand the structure and function of financial markets.', category: 'Finance' },
-  { id: 8, title: 'Introduction to Cybersecurity', platform: 'edX', link: 'https://www.edx.org/learn/cybersecurity/introduction-to-cybersecurity', description: 'Learn about cybersecurity threats and defense mechanisms.', category: 'Technology' },
-  { id: 9, title: 'Graphic Design Fundamentals', platform: 'Coursera', link: 'https://www.coursera.org/learn/graphic-design-fundamentals', description: 'Master the basics of graphic design principles.', category: 'Design' },
-  { id: 10, title: 'SQL for Data Science', platform: 'Coursera', link: 'https://www.coursera.org/learn/sql-for-data-science', description: 'Learn SQL for data analysis and manipulation.', category: 'Technology' },
-  { id: 11, title: 'Cloud Computing Basics', platform: 'edX', link: 'https://www.edx.org/learn/cloud-computing/introduction-to-cloud-computing', description: 'An introduction to cloud computing concepts and services.', category: 'Technology' },
-  { id: 12, title: 'JavaScript Algorithms and Data Structures', platform: 'freeCodeCamp', link: 'https://www.freecodecamp.org/learn/javascript-algorithms-and-data-structures/', description: 'Learn fundamental JavaScript concepts and data structures.', category: 'Technology' },
-  { id: 13, title: 'Business Analytics Specialization', platform: 'Coursera', link: 'https://www.coursera.org/specializations/business-analytics', description: 'Develop skills in data modeling, analytics, and decision making.', category: 'Business' },
-  { id: 14, title: 'Supply Chain Management', platform: 'edX', link: 'https://www.edx.org/learn/supply-chain-management', description: 'Understand the complexities of global supply chains.', category: 'Business' },
-  { id: 15, title: 'Artificial Intelligence for Everyone', platform: 'Coursera', link: 'https://www.coursera.org/learn/ai-for-everyone', description: 'Demystify AI and understand its impact on business and society.', category: 'Technology' },
-  { id: 16, title: 'React - The Complete Guide', platform: 'Udemy', link: 'https://www.udemy.com/course/react-the-complete-guide-incl-redux/', description: 'Master React.js and build powerful front-end applications.', category: 'Technology' },
-  { id: 17, title: 'Introduction to Psychology', platform: 'Coursera', link: 'https://www.coursera.org/learn/introduction-psychology', description: 'Explore the scientific study of the mind and behavior.', category: 'Science' },
-  { id: 18, title: 'Blockchain Basics', platform: 'Coursera', link: 'https://www.coursera.org/learn/blockchain-basics', description: 'Understand the core concepts of blockchain technology.', category: 'Technology' },
-  { id: 19, title: 'Agile Project Management', platform: 'edX', link: 'https://www.edx.org/learn/agile-project-management', description: 'Learn agile methodologies for project delivery.', category: 'Business' },
-  { id: 20, title: 'Data Visualization with Python', platform: 'Coursera', link: 'https://www.coursera.org/learn/data-visualization-python', description: 'Create compelling data visualizations using Python.', category: 'Technology' },
-  { id: 21, title: 'Fundamentals of Accounting', platform: 'Swayam', link: 'https://swayam.gov.in/nd1_sem1/cec19_mg01/preview', description: 'Basic principles of accounting for non-finance professionals.', category: 'Finance' },
-  { id: 22, title: 'Effective Public Speaking', platform: 'Coursera', link: 'https://www.coursera.org/learn/public-speaking', description: 'Improve your public speaking and presentation skills.', category: 'Soft Skills' },
-  { id: 23, title: 'Introduction to R for Data Science', platform: 'edX', link: 'https://www.edx.org/learn/r-programming/introduction-to-r-for-data-science', description: 'Learn the basics of R programming for data analysis.', category: 'Technology' },
-  { id: 24, title: 'Game Development with Unity', platform: 'Coursera', link: 'https://www.coursera.org/specializations/game-development-unity', description: 'Build 2D and 3D games using Unity.', category: 'Technology' },
-  { id: 25, title: 'Cybersecurity for Business', platform: 'LinkedIn Learning', link: 'https://www.linkedin.com/learning/cybersecurity-for-business-leaders', description: 'Understand cybersecurity risks and strategies for businesses.', category: 'Business' },
-  { id: 26, title: 'Introduction to HTML5', platform: 'edX', link: 'https://www.edx.org/learn/html5/introduction-to-html5', description: 'Learn the foundational language of the web.', category: 'Technology' },
-  { id: 27, title: 'CSS3 Fundamentals', platform: 'Udemy', link: 'https://www.udemy.com/course/css-the-complete-guide/', description: 'Style web pages with modern CSS techniques.', category: 'Technology' },
-  { id: 28, title: 'Node.js, Express, MongoDB & More', platform: 'Udemy', link: 'https://www.udemy.com/course/nodejs-express-mongodb-bootcamp/', description: 'Build robust backend applications with Node.js.', category: 'Technology' },
-  { id: 29, title: 'Data Structures & Algorithms in Java', platform: 'Coursera', link: 'https://www.coursera.org/specializations/data-structures-algorithms', description: 'Master essential data structures and algorithms.', category: 'Technology' },
-  { id: 30, title: 'Google IT Support Professional Certificate', platform: 'Coursera', link: 'https://www.coursera.org/professional-certificates/google-it-support', description: 'Prepare for an entry-level job in IT support.', category: 'Technology' },
-  { id: 31, title: 'Introduction to Cloud Identity', platform: 'Coursera', link: 'https://www.coursera.org/learn/introduction-to-cloud-identity', description: 'Understand identity and access management in the cloud.', category: 'Technology' },
-  { id: 32, title: 'Introduction to TensorFlow for AI, ML, and DL', platform: 'Coursera', link: 'https://www.coursera.org/learn/introduction-tensorflow', description: 'Learn to build and train neural networks with TensorFlow.', category: 'Technology' },
-  { id: 33, title: 'Marketing Analytics', platform: 'edX', link: 'https://www.edX.org/learn/marketing-analytics', description: 'Use data to drive marketing decisions.', category: 'Marketing' },
-  { id: 34, title: 'Customer Relationship Management', platform: 'Swayam', link: 'https://swayam.gov.in/nd1_sem1/cec19_mg03/preview', description: 'Strategies for managing customer relationships effectively.', category: 'Business' },
-  { id: 35, title: 'Photography Basics and Beyond', platform: 'Coursera', link: 'https://www.coursera.org/learn/photography-basics', description: 'Learn the fundamentals of digital photography.', category: 'Arts & Culture' },
-  { id: 36, title: 'Introduction to Linux', platform: 'edX', link: 'https://www.edX.org/learn/linux/introduction-to-linux', description: 'Get started with the Linux operating system.', category: 'Technology' },
-  { id: 37, title: 'Java Programming and Software Engineering Fundamentals', platform: 'Coursera', link: 'https://www.coursera.org/specializations/java-programming', description: 'Learn Java and object-oriented programming.', category: 'Technology' },
-  { id: 38, title: 'UX Design Fundamentals', platform: 'Coursera', link: 'https://www.coursera.org/learn/user-experience-design', description: 'Understand the principles of user experience design.', category: 'Design' },
-  { id: 39, title: 'Introduction to Microsoft Excel', platform: 'Coursera', link: 'https://www.coursera.org/learn/excel-basics', description: 'Master essential Excel functions for data analysis.', category: 'Business' },
-  { id: 40, title: 'Data Science with Python', platform: 'IBM (Coursera)', link: 'https://www.coursera.org/professional-certificates/ibm-data-science', description: 'A comprehensive program for aspiring data scientists.', category: 'Technology' },
-  { id: 41, title: 'Introduction to Game Design', platform: 'Coursera', link: 'https://www.coursera.org/learn/game-design', description: 'Learn the core principles of game design.', category: 'Design' },
-  { id: 42, title: 'Foundations of Project Management', platform: 'Coursera', link: 'https://www.coursera.org/professional-certificates/google-project-management', description: 'Google Project Management Professional Certificate.', category: 'Business' },
-  { id: 43, title: 'Elements of AI', platform: 'Elements of AI', link: 'https://www.elementsofai.com/', description: 'A free online course about the basics of AI.', category: 'Technology' },
-  { id: 44, title: 'Introduction to Computer Science and Programming Using Python', platform: 'edX', link: 'https://www.edx.org/course/introduction-to-computer-science-and-programming-using-python', description: 'MIT\'s foundational computer science course.', category: 'Technology' },
-  { id: 45, title: 'The Science of Well-Being', platform: 'Coursera', link: 'https://www.coursera.org/learn/the-science-of-well-being', description: 'Yale\'s most popular course on happiness.', category: 'Science' },
-  { id: 46, title: 'Python Data Structures', platform: 'Coursera', link: 'https://www.coursera.org/learn/python-data-structures', description: 'Learn about Python data structures and algorithms.', category: 'Technology' },
-  { id: 47, title: 'Introduction to HTML and CSS', platform: 'Coursera', link: 'https://www.coursera.org/learn/html-css-javascript-for-web-developers', description: 'Build basic web pages with HTML and CSS.', category: 'Technology' },
-  { id: 48, title: 'Introduction to iOS App Development with Swift', platform: 'Coursera', link: 'https://www.coursera.org/specializations/ios-app-development', description: 'Learn to build iOS apps with Swift and Xcode.', category: 'Technology' },
-  { id: 49, title: 'Fundamentals of Digital Marketing', platform: 'Google Digital Garage', link: 'https://learndigital.withgoogle.com/digitalgarage/course/digital-marketing', description: 'Free course by Google on digital marketing essentials.', category: 'Marketing' },
-  { id: 50, title: 'Excel Skills for Business', platform: 'Coursera', link: 'https://www.coursera.org/specializations/excel-skills-for-business', description: 'Master advanced Excel skills for business analysis.', category: 'Business' },
-  { id: 51, title: 'Data Analysis and Visualization Foundations', platform: 'LinkedIn Learning', link: 'https://www.linkedin.com/learning/paths/data-analysis-and-visualization-foundations', description: 'Learn to analyze and visualize data effectively.', category: 'Technology' },
-  { id: 52, title: 'Introduction to Data Analytics', platform: 'Google (Coursera)', link: 'https://www.coursera.org/professional-certificates/google-data-analytics', description: 'Google Data Analytics Professional Certificate.', category: 'Technology' },
-  { id: 53, title: 'Foundations of User Experience (UX) Design', platform: 'Google (Coursera)', link: 'https://www.coursera.org/professional-certificates/google-ux-design', description: 'Google UX Design Professional Certificate.', category: 'Design' },
-  { id: 54, title: 'Python for Data Analysis', platform: 'DataCamp', link: 'https://www.datacamp.com/courses/python-for-data-analysis', description: 'Learn to analyze data using Python libraries like Pandas.', category: 'Technology' },
-  { id: 55, title: 'Introduction to Cloud Computing', platform: 'IBM (Coursera)', link: 'https://www.coursera.org/learn/introduction-to-cloud', description: 'Explore the basics of cloud computing from IBM.', category: 'Technology' },
-  { id: 56, title: 'Front-End Web Development with React', platform: 'Coursera', link: 'https://www.coursera.org/learn/front-end-react', description: 'Build modern web applications using React.', category: 'Technology' },
-  { id: 57, title: 'Introduction to Cybercrime', platform: 'FutureLearn', link: 'https://www.futurelearn.com/courses/cybercrime', description: 'Understand the nature of cybercrime and its impact.', category: 'Cybersecurity' },
-  { id: 58, title: 'Mindfulness for Well-being', platform: 'Coursera', link: 'https://www.coursera.org/learn/mindfulness-wellbeing', description: 'Practice mindfulness for stress reduction and well-being.', category: 'Well-being' },
-  { id: 59, title: 'Introduction to Business Management', platform: 'edX', link: 'https://www.edX.org/learn/business-management', description: 'Key concepts and practices in modern business management.', category: 'Business' },
-  { id: 60, title: 'Data Engineering with Google Cloud', platform: 'Coursera', link: 'https://www.coursera.org/specializations/gcp-data-engineering', description: 'Build and manage data pipelines on Google Cloud.', category: 'Technology' },
-  { id: 61, title: 'Introduction to SQL', platform: 'DataCamp', link: 'https://www.datacamp.com/courses/introduction-to-sql', description: 'A beginner-friendly introduction to SQL.', category: 'Technology' },
-  { id: 62, title: 'The Complete JavaScript Course 2024', platform: 'Udemy', link: 'https://www.udemy.com/course/the-complete-javascript-course/', description: 'Master JavaScript from scratch to advanced concepts.', category: 'Technology' },
-  { id: 63, title: 'Introduction to Game Theory', platform: 'Coursera', link: 'https://www.coursera.org/learn/game-theory-1', description: 'Explore strategic thinking and decision-making.', category: 'Science' },
-  { id: 64, title: 'Digital Photography: From Beginner to Pro', platform: 'Udemy', link: 'https://www.udemy.com/course/digital-photography-for-beginners-to-advanced-training/', description: 'Comprehensive guid
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Monthly Plan -->
+                <div class="border-2 border-green-500 rounded-2xl p-8 flex flex-col bg-white shadow-lg relative overflow-hidden">
+                    <span class="absolute top-4 right-4 bg-green-100 text-green-800 text-xs font-bold px-3 py-1 rounded-full">MOST POPULAR</span>
+                    <h2 class="text-2xl font-bold text-gray-900">Monthly</h2>
+                    <p class="text-gray-500 mt-2">Perfect for getting started.</p>
+                    <div class="my-8">
+                        <span class="text-5xl font-extrabold text-gray-900">₹69</span>
+                        <span class="text-lg text-gray-500 line-through ml-2">₹299</span>
+                        <span class="text-lg text-gray-600 block">for the first month</span>
+                    </div>
+                    <p class="text-center text-gray-600 mb-6">Then ₹199/month</p>
+                    <button onclick="selectPlan('Monthly', 69)" class="w-full bg-green-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-700 transition-transform transform hover:scale-105">
+                        Choose Monthly
+                    </button>
+                </div>
+
+                <!-- Yearly Plan -->
+                <div class="border border-gray-200 rounded-2xl p-8 flex flex-col bg-white shadow-md">
+                    <h2 class="text-2xl font-bold text-gray-900">Yearly</h2>
+                    <p class="text-gray-500 mt-2">Save big with the annual plan.</p>
+                    <div class="my-8">
+                        <span class="text-5xl font-extrabold text-gray-900">₹1699</span>
+                        <span class="text-lg text-gray-500 line-through ml-2">₹3588</span>
+                        <span class="text-lg text-gray-600 block">per year</span>
+                    </div>
+                    <p class="text-center text-gray-600 mb-6">&nbsp;</p> <!-- Spacer for alignment -->
+                    <button onclick="selectPlan('Yearly', 1699)" class="w-full bg-gray-800 text-white font-bold py-3 px-6 rounded-lg hover:bg-gray-900 transition-transform transform hover:scale-105">
+                        Choose Yearly
+                    </button>
+                </div>
+            </div>
+
+            <div class="mt-12 bg-white p-8 rounded-2xl shadow-md border border-gray-200">
+                <h3 class="text-2xl font-bold text-center text-gray-900">Premium Features Included</h3>
+                <ul class="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4 text-gray-700">
+                    <li class="flex items-center">
+                        <svg class="w-6 h-6 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        Access to 500+ exclusive courses
+                    </li>
+                    <li class="flex items-center">
+                        <svg class="w-6 h-6 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        Text companies first & get noticed
+                    </li>
+                    <li class="flex items-center">
+                        <svg class="w-6 h-6 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        Unlimited access to our job board
+                    </li>
+                    <li class="flex items-center">
+                        <svg class="w-6 h-6 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        Direct resume & certificate integration
+                    </li>
+                     <li class="flex items-center">
+                        <svg class="w-6 h-6 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        AI-powered resume builder
+                    </li>
+                     <li class="flex items-center">
+                        <svg class="w-6 h-6 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        Priority customer support
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- View 2: Payment Gateway -->
+        <div id="payment-gateway-view" class="view hidden w-full max-w-md mx-auto">
+            <div class="bg-white rounded-2xl shadow-xl p-8">
+                <div class="flex justify-between items-center mb-6">
+                    <button onclick="goBack()" class="text-gray-500 hover:text-gray-800">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                    </button>
+                    <h2 class="text-xl font-bold">Complete Payment</h2>
+                    <div class="w-6"></div> <!-- Spacer -->
+                </div>
+
+                <div class="bg-green-50 border border-green-200 rounded-lg p-4 text-center mb-6">
+                    <p class="text-gray-600">You are paying for the <span id="plan-name" class="font-bold text-green-800"></span> plan.</p>
+                    <p class="text-3xl font-extrabold text-green-600 mt-1">₹<span id="plan-amount"></span></p>
+                </div>
+
+                <!-- Payment Method Tabs -->
+                <div class="flex border-b border-gray-200 mb-6">
+                    <button id="upi-tab" onclick="switchTab('upi')" class="flex-1 py-3 font-semibold border-b-2 border-green-600 text-green-600">UPI</button>
+                    <button id="card-tab" onclick="switchTab('card')" class="flex-1 py-3 font-semibold border-b-2 border-transparent text-gray-400">Card</button>
+                </div>
+
+                <!-- UPI Options -->
+                <div id="upi-content">
+                    <p class="text-center text-gray-500 mb-4">Select your preferred UPI app</p>
+                    <div class="space-y-4">
+                        <button onclick="processPayment('GPay')" class="w-full flex items-center justify-center p-4 border border-gray-300 rounded-lg hover:border-green-500 hover:bg-green-50 transition">
+                            <img src="https://placehold.co/100x30/FFFFFF/000000?text=GPay" alt="GPay" class="h-6">
+                        </button>
+                         <button onclick="processPayment('AmazonPay')" class="w-full flex items-center justify-center p-4 border border-gray-300 rounded-lg hover:border-green-500 hover:bg-green-50 transition">
+                            <img src="https://placehold.co/100x30/FFFFFF/000000?text=Amazon+Pay" alt="Amazon Pay" class="h-7">
+                        </button>
+                         <button onclick="processPayment('Paytm')" class="w-full flex items-center justify-center p-4 border border-gray-300 rounded-lg hover:border-green-500 hover:bg-green-50 transition">
+                            <img src="https://placehold.co/100x30/FFFFFF/000000?text=Paytm" alt="Paytm" class="h-6">
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Card Form -->
+                <div id="card-content" class="hidden">
+                    <form onsubmit="event.preventDefault(); processPayment('Card');">
+                        <div class="space-y-4">
+                            <div>
+                                <label for="card-number" class="text-sm font-medium text-gray-700">Card Number</label>
+                                <input type="text" id="card-number" class="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500" placeholder="0000 0000 0000 0000" required>
+                            </div>
+                            <div class="flex space-x-4">
+                                <div class="flex-1">
+                                    <label for="expiry-date" class="text-sm font-medium text-gray-700">Expiry Date</label>
+                                    <input type="text" id="expiry-date" class="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500" placeholder="MM / YY" required>
+                                </div>
+                                <div class="flex-1">
+                                    <label for="cvv" class="text-sm font-medium text-gray-700">CVV</label>
+                                    <input type="text" id="cvv" class="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500" placeholder="123" required>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="submit" class="w-full mt-8 bg-green-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-700 transition">
+                            Pay Securely
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- View 3: Payment Success -->
+        <div id="success-view" class="view hidden w-full max-w-md mx-auto">
+            <div class="bg-white rounded-2xl shadow-xl p-8 text-center flex flex-col items-center">
+                <div class="success-checkmark w-24 h-24">
+                    <svg class="w-full h-full" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+                        <circle class="success-checkmark__circle" cx="26" cy="26" r="25" fill="none" stroke="#10B981" stroke-width="3"/>
+                        <path class="success-checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8" stroke="#10B981" stroke-width="4" stroke-linecap="round"/>
+                    </svg>
+                </div>
+                <h2 class="text-3xl font-extrabold text-gray-900 mt-6">Payment Successful!</h2>
+                <p class="text-gray-600 mt-2">Thank you! Your subscription is now active.</p>
+                <p id="success-message" class="mt-4 text-green-700 bg-green-100 rounded-lg px-4 py-2"></p>
+                <button class="w-full mt-8 bg-green-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-700 transition">
+                    Continue to App
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- DOM Elements ---
+        const planSelectionView = document.getElementById('plan-selection-view');
+        const paymentGatewayView = document.getElementById('payment-gateway-view');
+        const successView = document.getElementById('success-view');
+
+        const planNameEl = document.getElementById('plan-name');
+        const planAmountEl = document.getElementById('plan-amount');
+        const successMessageEl = document.getElementById('success-message');
+
+        const upiTab = document.getElementById('upi-tab');
+        const cardTab = document.getElementById('card-tab');
+        const upiContent = document.getElementById('upi-content');
+        const cardContent = document.getElementById('card-content');
+
+        let selectedPlan = {};
+
+        // --- View Switching Logic ---
+        function showView(viewToShow) {
+            planSelectionView.classList.add('hidden');
+            paymentGatewayView.classList.add('hidden');
+            successView.classList.add('hidden');
+            
+            viewToShow.classList.remove('hidden');
+        }
+
+        // --- Plan Selection ---
+        function selectPlan(name, amount) {
+            selectedPlan = { name, amount };
+            planNameEl.textContent = name;
+            planAmountEl.textContent = amount;
+            showView(paymentGatewayView);
+        }
+
+        // --- Payment Gateway Logic ---
+        function goBack() {
+            showView(planSelectionView);
+        }
+
+        function switchTab(tab) {
+            if (tab === 'upi') {
+                upiTab.classList.add('border-green-600', 'text-green-600');
+                upiTab.classList.remove('border-transparent', 'text-gray-400');
+                cardTab.classList.add('border-transparent', 'text-gray-400');
+                cardTab.classList.remove('border-green-600', 'text-green-600');
+
+                upiContent.classList.remove('hidden');
+                cardContent.classList.add('hidden');
+            } else {
+                cardTab.classList.add('border-green-600', 'text-green-600');
+                cardTab.classList.remove('border-transparent', 'text-gray-400');
+                upiTab.classList.add('border-transparent', 'text-gray-400');
+                upiTab.classList.remove('border-green-600', 'text-green-600');
+
+                cardContent.classList.remove('hidden');
+                upiContent.classList.add('hidden');
+            }
+        }
+
+        // --- Payment Processing Simulation ---
+        function processPayment(method) {
+            // In a real app, you would handle payment processing here.
+            // For this simulation, we just show a success message.
+            console.log(`Processing payment of ₹${selectedPlan.amount} for ${selectedPlan.name} plan via ${method}`);
+            
+            successMessageEl.textContent = `You've successfully subscribed to the ${selectedPlan.name} plan.`;
+            
+            // Add a small delay to simulate processing
+            const processingOverlay = document.createElement('div');
+            processingOverlay.className = 'fixed inset-0 bg-white bg-opacity-75 flex items-center justify-center z-50';
+            processingOverlay.innerHTML = `
+                <div class="text-center">
+                    <svg class="animate-spin h-10 w-10 text-green-600 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <p class="mt-4 text-lg font-semibold text-gray-700">Processing Payment...</p>
+                </div>
+            `;
+            document.body.appendChild(processingOverlay);
+
+            setTimeout(() => {
+                document.body.removeChild(processingOverlay);
+                showView(successView);
+            }, 2000); // 2-second delay
+        }
+
+    </script>
+</body>
+</html>
